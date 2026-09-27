@@ -6,6 +6,9 @@ import { truncate } from "../utils/text";
 
 export const FULL_TEXT_LIMIT = 180_000; // chars (~45k tokens) before switching to section digests
 export const DIGEST_CHUNK_CHARS = 60_000;
+/** Beyond this (roughly a long book), whole-source analysis is refused; highlights are used instead. */
+export const DIGEST_LIMIT = 600_000;
+const MAX_OUTLINE_HEADINGS = 60;
 
 export function esc(text: string): string {
   // Keep the model from confusing source text with our structural tags.
@@ -38,8 +41,26 @@ export function renderFullArticle(source: Source): string {
 }
 
 export function renderOutline(source: Source): string {
-  const headings = source.outline.filter((s) => s.heading).map((s) => `${"  ".repeat(Math.max(0, s.level - 2))}- ${esc(s.heading!)}`);
+  const headings = source.outline.filter((s) => s.heading).slice(0, MAX_OUTLINE_HEADINGS).map((s) => `${"  ".repeat(Math.max(0, s.level - 2))}- ${esc(s.heading!)}`);
   return headings.length ? `<article_outline>\n${headings.join("\n")}\n</article_outline>` : "";
+}
+
+export function withNeighbours(sections: Set<number>, count: number): Set<number> {
+  const out = new Set<number>();
+  for (const i of sections) for (const j of [i - 1, i, i + 1]) if (j >= 0 && j < count) out.add(j);
+  return out;
+}
+
+/** Long sources with highlights: the highlighted sections (and their neighbours) in full, the rest omitted. */
+export function renderFocusedArticle(source: Source, focusSections: Set<number>): string {
+  const parts = [...focusSections]
+    .sort((a, b) => a - b)
+    .map((i) => {
+      const section = source.outline[i];
+      const heading = section.heading ? ` heading="${attr(section.heading)}"` : "";
+      return `<section index="${i}"${heading}>\n${esc(section.paragraphs.join("\n\n"))}\n</section>`;
+    });
+  return `${renderOutline(source)}\n\n<article note="This source is long; only the sections around the reader's highlights are included.">\n${parts.join("\n\n")}\n</article>`;
 }
 
 /** Long sources: full text for sections the reader highlighted, digests for the rest. */

@@ -15,6 +15,8 @@ export interface StructuredRequest<T> {
   user: string;
   schema: z.ZodType<T>;
   maxTokens?: number;
+  /** How hard the model should think. Lower is faster; review/reformulation need less than comprehension. */
+  effort?: "low" | "medium" | "high";
   signal?: AbortSignal;
 }
 
@@ -73,7 +75,7 @@ export class AnthropicLLM implements StructuredLLM {
     this.client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true, maxRetries: 2 });
   }
 
-  async complete<T>({ name, system, user, schema, maxTokens = 32000, signal }: StructuredRequest<T>): Promise<T> {
+  async complete<T>({ name, system, user, schema, maxTokens = 32000, effort = "medium", signal }: StructuredRequest<T>): Promise<T> {
     let lastProblem = "";
     // One automatic structured retry if the output can't be parsed/validated.
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -88,7 +90,8 @@ export class AnthropicLLM implements StructuredLLM {
             max_tokens: maxTokens,
             system,
             messages: [{ role: "user", content }],
-            output_config: { format: zodOutputFormat(schema) },
+            // Haiku 4.5 doesn't accept the effort setting.
+            output_config: { format: zodOutputFormat(schema), ...(this.model.startsWith("claude-haiku") ? {} : { effort }) },
           },
           { signal },
         );

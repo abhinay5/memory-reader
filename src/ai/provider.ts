@@ -12,7 +12,7 @@ import type {
   Source,
   StudyMode,
 } from "../types";
-import type { StructuredLLM } from "./llm";
+import { AIError, type StructuredLLM } from "./llm";
 import {
   ANALYZE_SYSTEM,
   DIGEST_SYSTEM,
@@ -27,6 +27,9 @@ import {
 } from "./prompts";
 import {
   chunkSectionsForDigest,
+  DIGEST_LIMIT,
+  renderFocusedArticle,
+  withNeighbours,
   esc,
   FULL_TEXT_LIMIT,
   renderDigestRequest,
@@ -184,14 +187,19 @@ export class ClaudeProvider implements AIProvider {
     if (!source.extractedText.trim() || source.sourceType === "pasted_highlights") return "";
     if (source.extractedText.length <= FULL_TEXT_LIMIT) return renderFullArticle(source);
 
-    // Hierarchical processing for very long sources.
+    // Very long sources (e.g. a whole book). With highlights, send only the sections around them —
+    // fast and cheap. Without highlights, condense section by section, up to a hard size limit.
     const focus = sectionsContaining(source.outline, highlights);
+    if (focus.size > 0) return renderFocusedArticle(source, withNeighbours(focus, source.outline.length));
+    if (source.extractedText.length > DIGEST_LIMIT) {
+      throw new AIError("other", "This source is too long to analyze as a whole. Highlight the passages you care about and use “Generate from highlights” instead.");
+    }
     const chunks = chunkSectionsForDigest(source.outline, focus);
     const digests = new Map<number, string>();
     const queue = [...chunks];
     const worker = async () => {
       for (let chunk = queue.shift(); chunk; chunk = queue.shift()) {
-        const out = await this.llm.complete({ name: "digest", system: DIGEST_SYSTEM, user: renderDigestRequest(source, chunk), schema: DigestSchema, maxTokens: 16000, signal });
+        const out = await this.llm.complete({ name: "digest", system: DIGEST_SYSTEM, user: renderDigestRequest(source, chunk), schema: DigestSchema, maxTokens: 16000, effort: "low", signal });
         for (const s of out.sections) digests.set(s.index, s.digest);
       }
     };
@@ -217,7 +225,7 @@ export class ClaudeProvider implements AIProvider {
       .filter(Boolean)
       .join("\n\n");
 
-    const out = await this.llm.complete({ name: "analysis", system: ANALYZE_SYSTEM, user, schema: AnalysisSchema, signal });
+    const out = await this.llm.complete({ name: "analysis", system: ANALYZE_SYSTEM, user, schema: AnalysisSchema, effort: "medium", signal });
     const ideaKeys = new Set(out.ideas.map((i) => i.key));
     return {
       thesis: out.thesis,
@@ -266,7 +274,7 @@ Give more cards to central ideas; an idea may get zero cards if it doesn't justi
       .filter(Boolean)
       .join("\n\n");
 
-    const out = await this.llm.complete({ name: "cards", system: GENERATE_SYSTEM, user, schema: CardsSchema, signal });
+    const out = await this.llm.complete({ name: "cards", system: GENERATE_SYSTEM, user, schema: CardsSchema, effort: "medium", signal });
     return {
       cards: out.cards
         .filter((c) => iAlias.back.has(c.idea_key))
@@ -306,7 +314,7 @@ Give more cards to central ideas; an idea may get zero cards if it doesn't justi
     ]
       .filter(Boolean)
       .join("\n\n");
-    const out = await this.llm.complete({ name: "review", system: REVIEW_SYSTEM, user, schema: ReviewSchema, signal });
+    const out = await this.llm.complete({ name: "review", system: REVIEW_SYSTEM, user, schema: ReviewSchema, effort: "low", signal });
     return {
       reviews: out.reviews
         .filter((r) => cAlias.back.has(r.card_id))
@@ -333,7 +341,7 @@ Give more cards to central ideas; an idea may get zero cards if it doesn't justi
     ]
       .filter(Boolean)
       .join("\n\n");
-    const out = await this.llm.complete({ name: "card", system: REGENERATE_SYSTEM, user, schema: RegeneratedSchema, maxTokens: 16000, signal });
+    const out = await this.llm.complete({ name: "card", system: REGENERATE_SYSTEM, user, schema: RegeneratedSchema, maxTokens: 16000, effort: "low", signal });
     return { ideaId: idea.id, front: out.front.trim(), back: out.back.trim(), cardType: out.card_type, sourceExcerpt: out.source_excerpt.trim(), confidence: "medium" };
   }
 }

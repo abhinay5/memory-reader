@@ -232,3 +232,31 @@ describe("regeneration", () => {
     expect(llm.requests.at(-1)!.user).toContain("genuinely different retrieval route");
   });
 });
+
+describe("very long sources", () => {
+  const long: Source = {
+    ...source,
+    id: "src_long",
+    outline: Array.from({ length: 40 }, (_, i) => ({ heading: `Chapter ${i + 1}`, level: 2, paragraphs: [`Chapter ${i + 1} text. ` + "Lorem ipsum dolor sit amet. ".repeat(900)] })),
+  };
+  long.extractedText = long.outline.map((s) => s.paragraphs.join(" ")).join("\n\n");
+
+  it("sends only the sections around highlights, without digest calls", async () => {
+    const h = { ...hl("hl_long", "Chapter 20 text."), sourceId: long.id };
+    const llm = new FakeLLM({ analysis: { ...analysis, ideas: [], highlight_interpretations: [] } });
+    await analyzeSource({ provider: new ClaudeProvider(llm), source: long, highlights: [h], scope: "highlights", mode: "understand" });
+    expect(llm.requests.map((r) => r.name)).toEqual(["analysis"]);
+    const prompt = llm.requests[0].user;
+    expect(prompt).toContain('<section index="19" heading="Chapter 20">');
+    expect(prompt).toContain('<section index="18"');
+    expect(prompt).not.toContain('<section index="5"');
+    expect(prompt.length).toBeLessThan(long.extractedText.length / 5);
+  });
+
+  it("refuses whole-book analysis without highlights instead of running up cost", async () => {
+    const huge = { ...long, extractedText: long.extractedText.repeat(2) };
+    const llm = new FakeLLM({});
+    await expect(analyzeSource({ provider: new ClaudeProvider(llm), source: huge, highlights: [], scope: "article", mode: "understand" })).rejects.toThrow(/too long/);
+    expect(llm.requests).toHaveLength(0);
+  });
+});
