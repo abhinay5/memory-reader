@@ -155,6 +155,7 @@ describe("analysis stage", () => {
     expect(ideas[0].evidenceHighlightIds).toEqual(["hl_a", "hl_b"]);
     expect(ideas[0].grounded).toBe(true);
     expect(ideas[1].grounded).toBe(true); // excerpt found in source text
+    expect(ideas[1].status).toBe("candidate"); // not highlighted → offered, not pre-selected
     expect(ideas[2].grounded).toBe(false); // invented evidence
     expect(ideas[2].status).toBe("candidate");
 
@@ -180,6 +181,7 @@ describe("card stage", () => {
       "According to Nielsen, why does internalized knowledge support creative thinking?",
       "Why does Michael Nielsen consider isolated 'orphan' questions poor spaced-repetition items?",
     ]);
+    // (generateCards receives whatever ideas the caller passes; the UI passes only approved ones.)
     expect(out.cards.every((c) => c.status === "suggested" && ideas.some((i) => i.id === c.ideaId))).toBe(true);
     expect(out.run.stats).toMatchObject({ cardsDroppedByReview: 1, cardsRevisedByReview: 1, duplicatesRemoved: 1 });
     expect((await cardsForSource(source.id)).map((c) => c.id).sort()).toEqual(out.cards.map((c) => c.id).sort());

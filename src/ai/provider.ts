@@ -158,7 +158,7 @@ Analyse the whole article. Produce its thesis, a short summary, and between roug
 </task>`;
     case "highlights":
       return `<task>
-The reader highlighted ${highlightCount} passage(s) while reading. Recover each highlight's meaning from its context and the article, group highlights that point to the same underlying idea, and infer the ideas the reader appears to be trying to understand. Do not make one idea per highlight by default. Return at most ${budget} ideas (usually fewer than the number of highlights), and a highlight_interpretations entry for every highlight.
+The reader highlighted ${highlightCount} passage(s) while reading. Recover each highlight's meaning from its context and the article, group highlights that point to the same underlying idea, and infer the ideas the reader appears to be trying to understand. Do not make one idea per highlight by default. Every idea must be pointed to by at least one highlight (cite it in evidence); use the rest of the article only as context for interpreting them, not as a source of extra ideas. Return at most ${budget} ideas (usually fewer than the number of highlights), and a highlight_interpretations entry for every highlight.
 ${STUDY_MODE_GUIDANCE[mode].guidance}
 </task>`;
     case "selection":

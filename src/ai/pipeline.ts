@@ -70,7 +70,8 @@ export async function analyzeSource(opts: {
       attribution: draft.attribution,
       centrality: draft.centrality,
       grounded,
-      status: grounded && draft.centrality !== "peripheral" ? "approved" : "candidate",
+      // In "from my highlights" runs, ideas the reader didn't highlight are offered but not pre-selected.
+      status: grounded && draft.centrality !== "peripheral" && (scope !== "highlights" || evidenceHighlightIds.length > 0) ? "approved" : "candidate",
       createdAt: now + i,
     };
   });
