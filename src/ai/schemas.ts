@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { CARD_TYPES, EPISTEMIC_STATUSES, HIGHLIGHT_DISPOSITIONS, HIGHLIGHT_RELATIONS, IDEA_TYPES } from "../types";
+import { EPISTEMIC_STATUSES, HIGHLIGHT_DISPOSITIONS, HIGHLIGHT_RELATIONS, IDEA_TYPES } from "../types";
+
+// The reader doesn't want cloze cards, so the model can't produce them.
+export const GENERATED_CARD_TYPES = ["definition", "explanation", "causal", "mechanism", "contrast", "relationship", "source_claim", "application"] as const;
 
 // Runtime schemas for every model response. They double as the JSON schema sent to the API
 // (structured outputs), and every response is validated again locally before use.
@@ -38,7 +41,7 @@ export const CardsSchema = z.object({
       idea_key: z.string(),
       front: z.string(),
       back: z.string(),
-      card_type: z.enum(CARD_TYPES),
+      card_type: z.enum(GENERATED_CARD_TYPES),
       source_excerpt: z.string(),
       confidence: z.enum(["high", "medium", "low"]),
     }),
@@ -77,7 +80,7 @@ export type ReviewOutput = z.infer<typeof ReviewSchema>;
 export const RegeneratedSchema = z.object({
   front: z.string(),
   back: z.string(),
-  card_type: z.enum(CARD_TYPES),
+  card_type: z.enum(GENERATED_CARD_TYPES),
   source_excerpt: z.string(),
 });
 export type RegeneratedOutput = z.infer<typeof RegeneratedSchema>;

@@ -101,7 +101,7 @@ const cards: CardsOutput = {
     { idea_key: "i1", front: "According to Nielsen, why does internalized knowledge support creative thinking?", back: "It increases the associations available during thought; you can't connect ideas you don't know.", card_type: "source_claim", source_excerpt: "Internalized knowledge greatly increases the number of associations available during thought.", confidence: "high" },
     { idea_key: "i1", front: "According to Nielsen, why does internalized knowledge support creative thought?", back: "Near-duplicate.", card_type: "source_claim", source_excerpt: "", confidence: "medium" },
     { idea_key: "i2", front: "What is an orphan question?", back: "A question lacking connections.", card_type: "definition", source_excerpt: "", confidence: "medium" },
-    { idea_key: "i1", front: "What do memory systems make memory?", back: "A choice.", card_type: "cloze", source_excerpt: "", confidence: "low" },
+    { idea_key: "i1", front: "What do memory systems make memory?", back: "A choice.", card_type: "definition", source_excerpt: "", confidence: "low" },
     { idea_key: "i7", front: "Unknown idea key", back: "Ignored.", card_type: "definition", source_excerpt: "", confidence: "low" },
   ],
   ideas_without_cards: [],

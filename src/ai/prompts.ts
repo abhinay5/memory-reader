@@ -59,10 +59,13 @@ Every prompt must:
 7. Not require exact wording, unless wording is the point (terminology, a definition that must be precise).
 8. Preserve attribution: "According to Nielsen, why …" / "What does Smith argue caused Y?" when the idea is a claim rather than established fact.
 9. Avoid trivia by default: dates, numbers, names and quotations only when they are genuinely significant to understanding.
+   - Quotations: make a card about what the quote means; never "who said…" or exact-wording cards.
+   - Numbers and dates: only when the magnitude matters, the date is historically meaningful, a threshold is operationally important, or the statistic is central to the argument.
+   - Names: only when knowing who is conceptually useful, not merely because someone is mentioned.
 10. Avoid enumerations ("Name all eleven properties…"). Decompose into focused prompts about the important components, or skip.
 11. Atomic does not mean cryptic: keep the conceptual context needed to make the question meaningful.
 
-Useful card types: definition, explanation (why/how), causal, mechanism, contrast, relationship, source_claim (attributed), application (only with a concrete scenario that has a determinate answer), cloze (rarely; only for terminology or precise relationships — never the default for conceptual writing; mark the deletion as {{c1::…}} in the front, and put the deleted text in the back).
+Useful card types: definition, explanation (why/how), causal, mechanism, contrast, relationship, source_claim (attributed), application (only with a concrete scenario that has a determinate answer). Never write cloze / fill-in-the-blank cards: every card is a question on the front and an answer on the back.
 
 Multiple prompts for one idea are welcome only when they exercise genuinely different retrieval routes (e.g. the mechanism, then a contrast, then an application). Never produce superficial paraphrases of the same question. Do not duplicate prompts listed in <existing_cards>.
 

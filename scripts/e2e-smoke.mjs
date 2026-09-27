@@ -84,7 +84,7 @@ const cards = {
     { idea_key: "i1", front: "According to Michael Nielsen, why does internalized knowledge support creative thinking?", back: "It increases the associations available during thought — you can't connect ideas you don't know.", card_type: "source_claim", source_excerpt: "Internalized knowledge greatly increases the number of associations available during thought.", confidence: "high" },
     { idea_key: "i1", front: "Why, on Nielsen's view, can't looking things up replace remembering them during creative work?", back: "Lookup interrupts the flow that creative association depends on, and you can't look up a connection you don't know exists.", card_type: "explanation", source_excerpt: "looking things up interrupts the flow that creative association depends upon.", confidence: "medium" },
     { idea_key: "i2", front: "What is an orphan question?", back: "A question lacking connections.", card_type: "definition", source_excerpt: "Isolated questions tend to become orphans", confidence: "medium" },
-    { idea_key: "i1", front: "What do memory systems make memory?", back: "A choice.", card_type: "cloze", source_excerpt: "", confidence: "low" },
+    { idea_key: "i1", front: "What do memory systems make memory?", back: "A choice.", card_type: "definition", source_excerpt: "", confidence: "low" },
   ],
   ideas_without_cards: [],
 };
