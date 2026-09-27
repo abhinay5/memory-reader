@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Memory Reader",
+  "version": "0.1.0",
+  "description": "Turn what you read into carefully designed retrieval prompts and send them to Mochi.",
+  "minimum_chrome_version": "116",
+  "action": {
+    "default_title": "Open Memory Reader",
+    "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  },
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "background": { "service_worker": "background.js", "type": "module" },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "options_page": "settings.html",
+  "permissions": ["activeTab", "scripting", "sidePanel", "storage", "contextMenus"],
+  "host_permissions": ["https://api.anthropic.com/*", "https://app.mochi.cards/*"],
+  "optional_host_permissions": ["<all_urls>"],
+  "commands": {
+    "_execute_action": { "description": "Open Memory Reader" },
+    "highlight-selection": { "description": "Highlight the selected text" },
+    "remember-selection": { "description": "Highlight the selected text and make cards from it" }
+  }
+}
